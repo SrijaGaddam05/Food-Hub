@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: #1a1a1a;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 40px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background-color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .clear-icon {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            cursor: pointer;
+            display: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-item {
+            color: #ff6b35;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item:hover {
+            color: #ff8c65;
+        }
+
+        .main-content {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .main-title {
+            font-size: 4.5rem;
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #ccc;
+            margin-bottom: 80px;
+            font-style: italic;
+        }
+
+        .food-grid {
+            position: relative;
+            width: 700px;
+            height: 700px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .food-item {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            transform-origin: center;
+            width: 140px;
+        }
+
+        .food-item:hover {
+            transform: scale(1.15);
+            z-index: 10;
+        }
+
+        .food-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid #ff6b35;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .food-item:hover .food-image {
+            border-color: #ff8c65;
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.6);
+        }
+
+        .food-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            text-align: center;
+        }
+
+        .food-item:nth-child(1) { top: 20px; left: 50%; transform: translateX(-50%); }
+        .food-item:nth-child(2) { top: 150px; right: 80px; }
+        .food-item:nth-child(3) { bottom: 150px; right: 80px; }
+        .food-item:nth-child(4) { bottom: 20px; left: 50%; transform: translateX(-50%); }
+        .food-item:nth-child(5) { bottom: 150px; left: 80px; }
+        .food-item:nth-child(6) { top: 150px; left: 80px; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f2 100%);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff6b35;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #ff6b35, #e55c32);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 13px 13px 0 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .heart-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .heart-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .heart-btn.favorited {
+            color: white;
+            animation: heartBeat 0.6s ease-in-out;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.25); }
+            100% { transform: scale(1.2); }
+        }
+
+        .modal-body {
+            padding: 30px;
+            color: #ff6b35;
+            background-color: white;
+        }
+
+        .recipe-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #ff6b35;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff6b35;
+            padding-bottom: 5px;
+        }
+
+        .ingredients-list {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin: 15px 0;
+            border: none;
+        }
+
+        .ingredients-list li {
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border: none;
+            color: #ff6b35;
+        }
+
+        .instructions-list {
+            counter-reset: step-counter;
+        }
+
+        .instructions-list li {
+            counter-increment: step-counter;
+            margin-bottom: 15px;
+            padding: 0;
+            background-color: transparent;
+            border-radius: 0;
+            border: none;
+            position: relative;
+            color: #ff6b35;
+            padding-left: 30px;
+        }
+
+        .instructions-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #ff6b35;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .prep-time {
+            background: linear-gradient(135deg, #ff6b35, #ff8c65);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .search-container {
+                margin: 0;
+                max-width: 100%;
+            }
+
+            .nav-menu {
+                gap: 20px;
+            }
+
+            .main-title {
+                font-size: 3rem;
+            }
+
+            .food-grid {
+                width: 500px;
+                height: 500px;
+            }
+
+            .food-item {
+                width: 100px;
+            }
+
+            .food-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .food-name {
+                font-size: 1rem;
+            }
+
+            .food-item:nth-child(1) { top: 15px; }
+            .food-item:nth-child(2) { top: 110px; right: 60px; }
+            .food-item:nth-child(3) { bottom: 110px; right: 60px; }
+            .food-item:nth-child(4) { bottom: 15px; }
+            .food-item:nth-child(5) { bottom: 110px; left: 60px; }
+            .food-item:nth-child(6) { top: 110px; left: 60px; }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .food-grid {
+                width: 350px;
+                height: 350px;
+            }
+
+            .food-item {
+                width: 80px;
+            }
+
+            .food-image {
+                width: 80px;
+                height: 80px;
+            }
+
+            .food-name {
+                font-size: 0.9rem;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .food-item:nth-child(1) { top: 10px; }
+            .food-item:nth-child(2) { top: 80px; right: 40px; }
+            .food-item:nth-child(3) { bottom: 80px; right: 40px; }
+            .food-item:nth-child(4) { bottom: 10px; }
+            .food-item:nth-child(5) { bottom: 80px; left: 40px; }
+            .food-item:nth-child(6) { top: 80px; left: 40px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Food Hub</div>
+        
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search food..." aria-label="Search Food">
+            <span class="clear-icon">✕</span>
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item">HOME</a>
+            <a href="#" class="nav-item">ABOUT</a>
+            <a href="#" class="nav-item">SERVICE</a>
+            <a href="#" class="nav-item">CONTACT</a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <h1 class="main-title">Food Hub</h1>
+        <p class="subtitle">"Every meal is a chance to create something beautiful"</p>
+
+        <div class="food-grid">
+            <div class="food-item" data-food="pizza">
+                <img src="https://cdn.pixabay.com/photo/2017/12/09/08/18/pizza-3007395_960_720.jpg" alt="Pizza" class="food-image">
+                <div class="food-name">Pizza</div>
+            </div>
+
+            <div class="food-item" data-food="biryani">
+                <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_400/frjm2fuc175aezdkya1d" alt="Biryani" class="food-image">
+                <div class="food-name">Biryani</div>
+            </div>
+
+            <div class="food-item" data-food="pasta">
+                <img src="https://cdn.pixabay.com/photo/2017/12/10/14/47/pasta-3010062_960_720.jpg" alt="Pasta" class="food-image">
+                <div class="food-name">Pasta</div>
+            </div>
+
+            <div class="food-item" data-food="croissants">
+                <img src="https://img.delicious.com.au/cqtj-J0D/del/2015/12/cornetti-italian-croissants-24713-1.jpg" alt="Croissants" class="food-image">
+                <div class="food-name">Croissants</div>
+            </div>
+
+            <div class="food-item" data-food="sushi">
+                <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=400&fit=crop&crop=center" alt="Sushi" class="food-image">
+                <div class="food-name">Sushi</div>
+            </div>
+
+            <div class="food-item" data-food="gulab-jamun">
+                <img src="https://prashantcorner.com/cdn/shop/files/DakGulabJamunSR-2.jpg?v=1718083866" alt="Gulab Jamun" class="food-image">
+                <div class="food-name">Gulab Jamun</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Recipe Modal -->
+    <div class="modal-overlay" id="recipeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="heart-btn" id="heartBtn">♡</button>
+                <h2 class="modal-title" id="modalTitle">Recipe</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Recipe content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchBox = document.querySelector('.search-box');
+        const clearIcon = document.querySelector('.clear-icon');
+        const modal = document.getElementById('recipeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const closeModal = document.getElementById('closeModal');
+        const heartBtn = document.getElementById('heartBtn');
+        
+        // Track favorites
+        let favorites = new Set();
+        let currentFoodType = '';
+        
+        // Recipe data
+        const recipes = {
+            pizza: {
+                title: "Pizza",
+                prepTime: "30 minutes",
+                cookTime: "15 minutes",
+                ingredients: [
+                    "2 cups all-purpose flour",
+                    "1 tsp active dry yeast",
+                    "1 tsp salt",
+                    "3/4 cup warm water",
+                    "2 tbsp olive oil",
+                    "1/2 cup pizza sauce",
+                    "8 oz fresh mozzarella cheese",
+                    "Fresh basil leaves",
+                    "Salt and pepper to taste"
+                ],
+                instructions: [
+                    "Mix flour, yeast, and salt in a large bowl. Add warm water and olive oil, then knead for 8-10 minutes until smooth.",
+                    "Place dough in oiled bowl, cover, and let rise for 1 hour until doubled in size.",
+                    "Preheat oven to 475°F (245°C). Roll out dough on floured surface to desired thickness.",
+                    "Transfer to pizza pan, spread sauce evenly, leaving 1-inch border for crust.",
+                    "Add torn mozzarella pieces and season with salt and pepper.",
+                    "Bake for 12-15 minutes until crust is golden and cheese is bubbly.",
+                    "Remove from oven, add fresh basil leaves, slice and serve hot."
+                ]
+            },
+            biryani: {
+                title: "Chicken Biryani",
+                prepTime: "45 minutes",
+                cookTime: "1 hour",
+                ingredients: [
+                    "2 cups basmati rice",
+                    "500g chicken, cut into pieces",
+                    "2 large onions, sliced",
+                    "1/2 cup yogurt",
+                    "2 tsp ginger-garlic paste",
+                    "1 tsp red chili powder",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp biryani masala",
+                    "Saffron soaked in warm milk",
+                    "Fresh mint and coriander leaves",
+                    "Ghee and oil for cooking"
+                ],
+                instructions: [
+                    "Marinate chicken with yogurt, ginger-garlic paste, and spices for 30 minutes.",
+                    "Soak basmati rice for 30 minutes, then boil with whole spices until 70% cooked.",
+                    "Deep fry sliced onions until golden brown and crispy. Set aside.",
+                    "Cook marinated chicken in a heavy-bottomed pot until 80% done.",
+                    "Layer the partially cooked rice over chicken, sprinkle fried onions, mint, and coriander.",
+                    "Pour saffron milk over the top, cover with foil, then lid.",
+                    "Cook on high heat for 3-4 minutes, then reduce heat and cook for 45 minutes.",
+                    "Let it rest for 10 minutes before opening. Gently mix and serve hot."
+                ]
+            },
+            pasta: {
+                title: " Pasta",
+                prepTime: "15 minutes",
+                cookTime: "20 minutes",
+                ingredients: [
+                    "400g fettuccine pasta",
+                    "1/2 cup butter",
+                    "1 cup heavy cream",
+                    "1 cup freshly grated Parmesan cheese",
+                    "3 cloves garlic, minced",
+                    "Salt and black pepper to taste",
+                    "Fresh parsley for garnish",
+                    "Optional: grilled chicken or shrimp"
+                ],
+                instructions: [
+                    "Bring a large pot of salted water to boil. Cook pasta according to package directions until al dente.",
+                    "In a large skillet, melt butter over medium heat. Add minced garlic and sauté for 1 minute.",
+                    "Slowly pour in heavy cream, whisking constantly. Bring to a gentle simmer.",
+                    "Gradually add Parmesan cheese, whisking until smooth and creamy.",
+                    "Drain pasta, reserving 1/2 cup pasta water. Add pasta to the sauce.",
+                    "Toss pasta with sauce, adding pasta water if needed for consistency.",
+                    "Season with salt and pepper. Garnish with fresh parsley and serve immediately."
+                ]
+            },
+            croissants: {
+                title: "Croissants",
+                prepTime: "3 hours (with chilling time)",
+                cookTime: "20 minutes",
+                ingredients: [
+                    "3 cups all-purpose flour",
+                    "1/4 cup sugar",
+                    "1 tsp salt",
+                    "1 tbsp active dry yeast",
+                    "1/2 cup warm milk",
+                    "1 egg",
+                    "1 cup cold butter",
+                    "1 egg beaten (for egg wash)"
+                ],
+                instructions: [
+                    "Mix flour, sugar, salt, and yeast. Add warm milk and egg, knead into soft dough.",
+                    "Shape cold butter into rectangle, wrap dough around butter, seal edges.",
+                    "Roll dough into rectangle, fold into thirds. Chill for 30 minutes.",
+                    "Repeat rolling and folding process 2 more times, chilling between each fold.",
+                    "Roll final dough to 1/4 inch thickness, cut into triangles.",
+                    "Roll each triangle from wide end to tip, place on baking sheet with tip down.",
+                    "Let rise for 1-2 hours until doubled. Brush with egg wash.",
+                    "Bake at 400°F (200°C) for 15-20 minutes until golden brown."
+                ]
+            },
+            sushi: {
+                title: " Sushi",
+                prepTime: "45 minutes",
+                cookTime: "20 minutes",
+                ingredients: [
+                    "2 cups sushi rice",
+                    "3 tbsp rice vinegar",
+                    "2 tbsp sugar",
+                    "1 tsp salt",
+                    "4 nori sheets",
+                    "1 cucumber, julienned",
+                    "1 avocado, sliced",
+                    "200g imitation crab meat",
+                    "Sesame seeds",
+                    "Soy sauce and wasabi for serving"
+                ],
+                instructions: [
+                    "Cook sushi rice according to package directions. Let cool slightly.",
+                    "Mix rice vinegar, sugar, and salt. Gently fold into warm rice.",
+                    "Place nori sheet on bamboo mat, spread rice evenly, leaving 1-inch border.",
+                    "Flip nori so rice is on bottom. Add cucumber, avocado, and crab in center.",
+                    "Using mat, roll tightly from bottom, applying gentle pressure.",
+                    "Sprinkle rolled sushi with sesame seeds, pressing gently to adhere.",
+                    "Using sharp knife, cut roll into 8 pieces, wiping knife between cuts.",
+                    "Serve with soy sauce, wasabi, and pickled ginger."
+                ]
+            },
+            "gulab-jamun": {
+                title: "Traditional Gulab Jamun",
+                prepTime: "30 minutes",
+                cookTime: "45 minutes",
+                ingredients: [
+                    "1 cup milk powder",
+                    "1/4 cup all-purpose flour",
+                    "1/4 tsp baking soda",
+                    "2-3 tbsp ghee",
+                    "1/4 cup milk",
+                    "Oil for deep frying",
+                    "2 cups sugar",
+                    "2 cups water",
+                    "4-5 cardamom pods",
+                    "1 tsp rose water"
+                ],
+                instructions: [
+                    "Mix milk powder, flour, and baking soda. Add ghee and mix well.",
+                    "Gradually add milk to form soft, smooth dough. Let rest for 15 minutes.",
+                    "For syrup: Boil sugar, water, and cardamom until slightly thick. Add rose water.",
+                    "Shape dough into small, smooth balls without cracks.",
+                    "Heat oil to medium temperature. Fry balls slowly until golden brown.",
+                    "Remove fried balls and immediately add to warm syrup.",
+                    "Let soak for at least 2 hours for best flavor absorption.",
+                    "Serve warm or at room temperature, garnished with chopped nuts."
+                ]
+            }
+        };
+
+        // Search functionality
+        clearIcon.addEventListener('click', function () {
+            searchBox.value = '';
+            searchBox.focus();
+            clearIcon.style.display = 'none';
+        });
+
+        searchBox.addEventListener('input', function () {
+            clearIcon.style.display = this.value.length > 0 ? 'block' : 'none';
+        });
+
+        // Modal functionality
+        function openModal(foodType) {
+            const recipe = recipes[foodType];
+            if (recipe) {
+                currentFoodType = foodType;
+                modalTitle.textContent = recipe.title;
+                
+                // Update heart button state
+                updateHeartButton();
+                
+                modalBody.innerHTML = `
+                    <div class="prep-time">
+                        🕒 Prep: ${recipe.prepTime} | Cook: ${recipe.cookTime}
+                    </div>
+                    
+                    <div class="recipe-section">
+                        <h3 class="section-title">📋 Ingredients</h3>
+                        <ul class="ingredients-list">
+                            ${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="recipe-section">
+                        <h3 class="section-title">👨‍🍳 Instructions</h3>
+                        <ol class="instructions-list">
+                            ${recipe.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                        </ol>
+                    </div>
+                `;
+                
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function updateHeartButton() {
+            if (favorites.has(currentFoodType)) {
+                heartBtn.innerHTML = '♥';
+                heartBtn.classList.add('favorited');
+            } else {
+                heartBtn.innerHTML = '♡';
+                heartBtn.classList.remove('favorited');
+            }
+        }
+
+        function toggleFavorite() {
+            if (favorites.has(currentFoodType)) {
+                favorites.delete(currentFoodType);
+            } else {
+                favorites.add(currentFoodType);
+            }
+            updateHeartButton();
+        }
+
+        function closeModalFunc() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event listeners
+        const foodItems = document.querySelectorAll('.food-item');
+        foodItems.forEach(item => {
+            item.addEventListener('click', function () {
+                const foodType = this.getAttribute('data-food');
+                openModal(foodType);
+            });
+        });
+
+        closeModal.addEventListener('click', closeModalFunc);
+
+        heartBtn.addEventListener('click', toggleFavorite);
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                closeModalFunc();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                closeModalFunc();
+            }
+        });
+
+        // Navigation functionality
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                alert(`${this.textContent} page coming soon!`);
+            });
+        });
+    </script>
+</body>
+</html>
